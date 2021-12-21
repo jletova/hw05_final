@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if is_edit %}
+    Редактировать запись
+  {% else %}
+    Добавить запись
+  {% endif %} 
+{% endblock %}
+{% block content %}
+  {% if is_edit %}
+    {% with card_header='Редактировать запись' card_button='Сохранить' %}
+      {% include 'users/includes/form_base.html' %}
+    {% endwith %}
+  {% else %}
+    {% with card_header='Добавить запись' card_button='Добавить' %}
+      {% include 'users/includes/form_base.html' %}  
+    {% endwith %}
+  {% endif %}  
+{% endblock %}
