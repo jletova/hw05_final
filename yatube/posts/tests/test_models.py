@@ -44,15 +44,15 @@ class PostModelTest(TestCase):
                     expected_value
                 )
 
-    # def test_title_convert_to_slug(self):
-    #     """Содержимое поля title преобразуется в slug."""
-    #     group = PostModelTest.group
-    #     slug = group.slug
-    #     self.assertEqual(slug, 'zh' * 30)
+    def test_title_convert_to_slug(self):
+        """Содержимое поля title преобразуется в slug."""
+        group = PostModelTest.group
+        slug = group.slug
+        self.assertEqual(slug, 'zh' * 30)
 
-    # def test_text_slug_max_length_not_exceed(self):
-    #     """Содержимое поля title преобразуется в slug."""
-    #     group = PostModelTest.group
-    #     max_length_slug = group._meta.get_field('slug').max_length
-    #     length_slug = len(group.slug)
-    #     self.assertEqual(max_length_slug, length_slug)
+    def test_text_slug_max_length_not_exceed(self):
+        """Содержимое поля title преобразуется в slug."""
+        group = PostModelTest.group
+        max_length_slug = group._meta.get_field('slug').max_length
+        length_slug = len(group.slug)
+        self.assertEqual(max_length_slug, length_slug)

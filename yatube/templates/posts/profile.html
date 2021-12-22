@@ -14,7 +14,7 @@
         {{ author.username }}
       {% endif %} 
     </h1>
-    <h3>Всего постов: {{ author.posts.count }}</h3>
+    <h3>Всего постов: {{ page_obj.paginator.count }}</h3>
     {% if author != request.user  %}
       {% if following %}
         <a

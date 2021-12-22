@@ -1,12 +1,22 @@
+import tempfile
+import shutil
+
+from http import HTTPStatus
+
 from django import forms
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.core.cache import cache
+from django.conf import settings
+
 
 from posts.models import Post, Group, User, Comment, Follow
 
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -58,6 +68,11 @@ class PostPagesTests(TestCase):
         cache.clear()
         self.guest_client = Client()
 
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
         templates_pages_names = {
@@ -89,8 +104,8 @@ class PostPagesTests(TestCase):
         for url_label in pages_for_test:
             with self.subTest(field=url_label):
                 response = self.guest_client.get(self.HOME_URL[url_label])
-                first_object = response.context['page_obj'][0]
-                self.assertEqual(first_object, self.post)
+                # first_object = response.context['page_obj'][0]
+                self.assertEqual(response.context['page_obj'][0], self.post)
 
     def test_new_post_not_in_wrong_group(self):
         """Пост не попал в группу, для которой не был предназначен."""
@@ -164,14 +179,20 @@ class PostPagesTests(TestCase):
         Post.objects.all().delete()
         self.assertTrue(Post.objects.count() == 0)
         self.assertIn(self.post.text.encode(), response.content)
+        cache.clear()
+        response = self.auth_client.get(self.HOME_URL['index'])
+        self.assertNotIn(self.post.text.encode(), response.content)
 
     def test_auth_user_can_follow(self):
-        '''Авторизированный пользователь может подписаться и отписаться'''
+        '''Авторизированный пользователь может подписаться'''
         self.follower_client.get(self.HOME_URL['follow'])
         self.assertTrue(Follow.objects.filter(
             user=self.follower, author=self.user
         ).exists())
         self.assertTrue(Follow.objects.count() == 1)
+
+    def test_auth_user_can_unfollow(self):
+        '''Авторизированный пользователь может отписаться'''
         self.follower_client.get(self.HOME_URL['unfollow'])
         self.assertFalse(Follow.objects.filter(
             user=self.follower, author=self.user
@@ -188,3 +209,21 @@ class PostPagesTests(TestCase):
         self.assertIn(post, response.context['page_obj'].object_list)
         response = self.auth_client.get(self.HOME_URL['follow_index'])
         self.assertNotIn(post, response.context['page_obj'].object_list)
+
+    def test_comments_authorised_user(self):
+        '''Комментировать посты может авторизованный пользователь'''
+        test_comment = Comment.objects.create(
+            text='Тестовый комментарий',
+            post=self.post,
+            author=self.user,
+        )
+        response = self.auth_client.post(
+            '/posts/1/',
+            {'comments': test_comment}
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_no_comments_for_guest_user(self):
+        '''Переадресация гостя на логин при комментировании поста '''
+        response = self.guest_client.post('/posts/1/comment')
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)

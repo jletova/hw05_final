@@ -46,12 +46,14 @@ def profile(request, username):
     template = 'posts/profile.html'
     author = get_object_or_404(User, username=username)
     post_list = author.posts.all()
-    if request.user is authenticate and request.user != author:
-        following = Follow.objects.filter(
-            user=request.user, author__username=username
-        ).exists()
-    else:
-        following = False
+    following = False
+    if request.user is authenticate:
+        if request.user == author:
+            pass
+        else:
+            following = Follow.objects.filter(
+                user=request.user, author__username=username
+            ).exists()
     context = {
         'author': author,
         'page_obj': paginate(request, post_list),
@@ -131,7 +133,7 @@ def follow_index(request):
 
 @login_required
 def profile_follow(request, username):
-    author = User.objects.get(username=username)
+    author = get_object_or_404(User, username=username)
     if author != request.user:
         Follow.objects.get_or_create(
             user=request.user, author=author
