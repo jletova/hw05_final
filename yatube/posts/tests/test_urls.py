@@ -4,7 +4,7 @@ from django.test import TestCase, Client
 from django.core.cache import cache
 
 
-from posts.models import Group, Post, User, Comment
+from posts.models import Group, Post, User
 
 
 class StaticURLTests(TestCase):
