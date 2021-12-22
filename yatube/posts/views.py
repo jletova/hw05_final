@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.contrib.auth import authenticate
 from django.shortcuts import (
     render, redirect, get_object_or_404)
 
@@ -47,12 +46,9 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     post_list = author.posts.all()
     following = False
-    if request.user is authenticate:
-        if request.user == author:
-            pass
-        else:
-            following = Follow.objects.filter(
-                user=request.user, author__username=username
+    if request.user.is_authenticated and request.user != author:
+        following = Follow.objects.filter(
+            user=request.user, author__username=username
             ).exists()
     context = {
         'author': author,
