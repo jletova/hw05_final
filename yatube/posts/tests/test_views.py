@@ -34,6 +34,7 @@ class PostPagesTests(TestCase):
             'follow': reverse('posts:profile_follow', args={'auth'}),
             'unfollow': reverse('posts:profile_unfollow', args={'auth'}),
             'follow_index': reverse('posts:follow_index'),
+            'add_comment': reverse('posts:add_comment', args={1})
         }
         cls.user = User.objects.create_user(username='auth')
         cls.auth_client = Client()
@@ -194,11 +195,13 @@ class PostPagesTests(TestCase):
 
     def test_auth_user_can_unfollow(self):
         '''Авторизированный пользователь может отписаться'''
+        follow = Follow.objects.create(
+            user=self.follower, author=self.user)
         self.follower_client.get(self.HOME_URL['unfollow'])
         self.assertFalse(Follow.objects.filter(
             user=self.follower, author=self.user
         ).exists())
-        self.assertTrue(Follow.objects.count() == 0)
+        self.assertNotIn(follow, Follow.objects.all())
 
     def test_post_is_in_favorite_newsline(self):
         '''Новая запись есть в ленте подписчиков и ее нет у остальных'''
@@ -213,18 +216,17 @@ class PostPagesTests(TestCase):
 
     def test_comments_authorised_user(self):
         '''Комментировать посты может авторизованный пользователь'''
-        test_comment = Comment.objects.create(
-            text='Тестовый комментарий',
-            post=self.post,
-            author=self.user,
+        self.assertTrue(Comment.objects.count() == 0)
+        self.auth_client.post(
+            self.HOME_URL['add_comment'],
+            data={'text': 'Комментарий залогиненного пользователя'},
         )
-        response = self.auth_client.post(
-            '/posts/1/',
-            {'comments': test_comment}
-        )
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTrue(Comment.objects.filter(
+            text='Комментарий залогиненного пользователя'
+        ).exists())
+        self.assertTrue(Comment.objects.count() == 1)
 
     def test_no_comments_for_guest_user(self):
         '''Переадресация гостя на логин при комментировании поста '''
-        response = self.guest_client.post('/posts/1/comment')
+        response = self.guest_client.post(self.HOME_URL['add_comment'])
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
