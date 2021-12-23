@@ -48,8 +48,7 @@ def profile(request, username):
     following = False
     if request.user.is_authenticated and request.user != author:
         following = Follow.objects.filter(
-            user=request.user, author__username=username
-            ).exists()
+            user=request.user, author__username=username).exists()
     context = {
         'author': author,
         'page_obj': paginate(request, post_list),
