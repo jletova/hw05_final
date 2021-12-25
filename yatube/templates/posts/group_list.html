@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}Записи сообщества {{ group.title }}{% endblock %}
-{% block header %}{{ group.title }}{% endblock %}
+{% block title %}Записи сообщества {{ page_obj.0.group.title }}{% endblock %}
+{% block header %}{{ page_obj.0.group.title }}{% endblock %}
 {% load thumbnail %}
 {% block content %}
-  <p>{{ group.description }}</p>
+  <p>{{ page_obj.0.group.description }}</p>
   {% for post in page_obj %}
     <article>
       <ul>
@@ -12,7 +12,7 @@
           <a href="{% url 'posts:profile' post.author.username %}">
             {{ post.author.get_full_name }}
             {% if not post.author.get_full_name %}
-              {{ post.author.username }}
+              @{{ post.author.username }}
             {% endif %}
           </a>
         </li>

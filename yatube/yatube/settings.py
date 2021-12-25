@@ -20,10 +20,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '4j)+8pr@3ys!$mq0d9)8tanx(+rkvap10jwcq4&$hzas4lvbqg'
+# SECRET_KEY = '4j)+8pr@3ys!$mq0d9)8tanx(+rkvap10jwcq4&$hzas4lvbqg'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '4j)+8pr@3ys!$mq0d9)8tanx(+rkvap10jwcq4&$hzas4lvbqg')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool( os.environ.get('DJANGO_DEBUG', True) )
+# DEBUG = True
 
 # ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS = [
@@ -33,6 +36,9 @@ ALLOWED_HOSTS = [
     'testserver',
 ]
 
+INTERNAL_IPS = [
+    '127.0.0.1',
+] 
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,6 +53,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'about.apps.AboutConfig',
     'sorl.thumbnail',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'yatube.urls'

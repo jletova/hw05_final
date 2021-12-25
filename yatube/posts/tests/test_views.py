@@ -106,7 +106,6 @@ class PostPagesTests(TestCase):
         for url_label in pages_for_test:
             with self.subTest(field=url_label):
                 response = self.guest_client.get(self.HOME_URL[url_label])
-                # first_object = response.context['page_obj'][0]
                 self.assertEqual(response.context['page_obj'][0], self.post)
 
     def test_new_post_not_in_wrong_group(self):
@@ -140,6 +139,7 @@ class PostPagesTests(TestCase):
                 self.assertEqual(first_object.author, self.user)
                 self.assertEqual(first_object.group, self.post.group)
                 self.assertEqual(first_object.image, self.post.image)
+                self.assertEqual(first_object.id, self.post.id)
 
     def test_form_show_correct_context(self):
         """Проверка контекста создания и редактирования поста."""
@@ -171,9 +171,9 @@ class PostPagesTests(TestCase):
         comment_in_new_post = Comment.objects.filter(post=new_post).first()
         self.assertEqual(test_comment, comment_in_new_post)
         response = self.auth_client.get('/posts/1/')
-        self.assertNotIn(test_comment, response.context['comments'])
+        self.assertNotContains(response, 'Тестовый комментарий')
         response = self.auth_client.get('/posts/5/')
-        self.assertIn(test_comment, response.context['comments'])
+        self.assertContains(response, 'Тестовый комментарий')
 
     def test_cache_is_working(self):
         '''Проверка кеширования главной страницы'''

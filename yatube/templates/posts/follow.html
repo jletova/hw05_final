@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% block title %}Избранное{% endblock %}
-{% block header %}Избранное{% endblock %}
+{% block header %}
+  Избранное
+  <h6>Подписок: {{ user.follower.count }}     |    Подписчиков: {{ user.following.count }}  </h6>
+{% endblock %}
 {% block content %}
   {% include 'posts/includes/switcher.html' %}
   {% include 'posts/includes/post_list.html' %}
