@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
 {% block title %}Все посты пользователя 
-  {{ author.get_full_name }}
+  {% comment %} {{ author.get_full_name }}
   {% if not author.get_full_name %}
     {{ author.username }}
-  {% endif %}
+  {% endif %} {% endcomment %}
 {% endblock %}
 {% load thumbnail %}
 {% block content %}
   <div class="mb-5">
     <h1>Все посты пользователя 
-      {{ author.get_full_name }}
-      {% if not author.get_full_name %}
-        {{ author.username }}
-      {% endif %} 
+      {{ author.get_full_name }} or @{{ author.username }}
+      {% comment %} {% if not author.get_full_name %}
+        @{{ author.username }}
+      {% endif %}  {% endcomment %}
     </h1>
     <h3>Всего постов: {{ page_obj.paginator.count }}</h3>
     {% if author != request.user  %}
@@ -33,15 +33,9 @@
       {% endif %}
     {% endif %}
   </div>
-  {% for post in page_obj %}
+  {% comment %} {% for post in page_obj %}
     <article>
       <ul>
-        <li>
-          Автор: {{ author.get_full_name }}
-          {% if not author.get_full_name %}
-            {{ author.username }}
-          {% endif %}
-        </li>
         <li>
           Дата публикации: {{ post.pub_date|date:"d E Y" }}
         </li>
@@ -60,6 +54,7 @@
       {% endif %}
     </p>
     {% if not forloop.last %}<hr>{% endif %}
-  {% endfor %}
+  {% endfor %} {% endcomment %}
+  {% include 'posts/includes/post_list.html' %}
   {% include 'posts/includes/paginator.html' %}
 {% endblock %} 

@@ -2,6 +2,7 @@
 {% for post in page_obj %}
 <article>
   <ul>
+    {% if not 'profile' in url %}
     <li>
       Автор: 
       <a href="{% url 'posts:profile' post.author.username %}">
@@ -11,6 +12,7 @@
         {% endif %}
       </a>
     </li>
+    {% endif %}
     <li>
       Дата публикации: {{ post.pub_date|date:"d E Y" }}
     </li>

@@ -35,6 +35,7 @@ class StaticURLTests(TestCase):
             author=cls.user,
             text='Тестовый текст',
             pk=1,
+            group=cls.group,
         )
 
     def setUp(self):
@@ -103,24 +104,6 @@ class StaticURLTests(TestCase):
             with self.subTest(field=field):
                 response = self.guest_client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
-
-    # def test_comments_authorised_user(self):
-    #     '''Комментировать посты может авторизованный пользователь'''
-    #     test_comment = Comment.objects.create(
-    #         text='Тестовый комментарий',
-    #         post=self.post,
-    #         author=self.user,
-    #     )
-    #     response = self.authorized_client.post(
-    #         '/posts/1/',
-    #         {'comments': test_comment}
-    #     )
-    #     self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    # def test_no_comments_for_guest_user(self):
-    #     '''Переадресация гостя на логин при комментировании поста '''
-    #     response = self.guest_client.post('/posts/1/comment')
-    #     self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     def test_404_errors(self):
         """404 использует кастомный шаблон."""

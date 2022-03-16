@@ -118,7 +118,7 @@ class PostPagesTests(TestCase):
         response = self.auth_client.get(
             reverse('posts:group_list', args={'second'})
         )
-        self.assertNotIn(self.post, response.context['page_obj'])
+        self.assertNotContains(response, self.post)
         first_post_in_new_group = Post.objects.filter(group=new_group).first()
         self.assertNotEqual(first_post_in_new_group, self.post)
         first_post_without_group = Post.objects.filter(group=None).first()
@@ -180,10 +180,10 @@ class PostPagesTests(TestCase):
         response = self.auth_client.get(self.HOME_URL['index'])
         Post.objects.all().delete()
         self.assertTrue(Post.objects.count() == 0)
-        self.assertIn(self.post.text.encode(), response.content)
+        self.assertContains(response, self.post)
         cache.clear()
         response = self.auth_client.get(self.HOME_URL['index'])
-        self.assertNotIn(self.post.text.encode(), response.content)
+        self.assertNotContains(response, self.post)
 
     def test_auth_user_can_follow(self):
         '''Авторизированный пользователь может подписаться'''
@@ -216,7 +216,7 @@ class PostPagesTests(TestCase):
 
     def test_comments_authorised_user(self):
         '''Комментировать посты может авторизованный пользователь'''
-        self.assertTrue(Comment.objects.count() == 0)
+        comments_before = Comment.objects.count()
         self.auth_client.post(
             self.HOME_URL['add_comment'],
             data={'text': 'Комментарий залогиненного пользователя'},
@@ -224,7 +224,8 @@ class PostPagesTests(TestCase):
         self.assertTrue(Comment.objects.filter(
             text='Комментарий залогиненного пользователя'
         ).exists())
-        self.assertTrue(Comment.objects.count() == 1)
+        comments_after = Comment.objects.count()
+        self.assertTrue(comments_after - comments_before == 1)
 
     def test_no_comments_for_guest_user(self):
         '''Переадресация гостя на логин при комментировании поста '''

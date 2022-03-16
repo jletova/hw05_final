@@ -32,7 +32,8 @@ def index(request):
 
 def group_posts(request, slug):
     template = 'posts/group_list.html'
-    post_list = get_list_or_404(Post, group__slug=slug)
+    group = get_object_or_404(Group, slug=slug)
+    post_list = group.posts.all()
     context = {
         'page_obj': paginate(request, post_list),
     }
@@ -43,6 +44,7 @@ def profile(request, username):
     template = 'posts/profile.html'
     author = get_object_or_404(User, username=username)
     post_list = author.posts.all()
+    # post_list = Post.objects.filter(author__username = username)
     following = (request.user.is_authenticated 
         and request.user != author and Follow.objects.filter(
             user=request.user, author__username=username).exists())
@@ -59,7 +61,7 @@ def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     context = {
         'post': post,
-        'form': CommentForm(request.POST),
+        'form': CommentForm(request.POST or None),
     }
     return render(request, template, context)
 
@@ -68,13 +70,12 @@ def post_detail(request, post_id):
 def post_create(request):
     template = 'posts/create_post.html'
     if request.method == 'POST':
-        author = request.user
         form = PostForm(request.POST or None, request.FILES or None)
         if form.is_valid():
             new_post = form.save(commit=False)
-            new_post.author = author
+            new_post.author = request.user
             new_post.save()
-            return redirect('posts:profile', author)
+            return redirect('posts:profile', request.user)
         return render(request, template, {'form': form})
     form = PostForm()
     return render(request, template, {'form': form})
